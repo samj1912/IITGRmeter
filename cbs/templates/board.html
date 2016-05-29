@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load app_filters %}
+
+{%block title%}
+{{curr_board.title}} | {{block.super}}
+
+{%endblock title%}
+
+{%block nav%}
+	<li><a href="/">Home</a></li>
+
+	{% for board in boards %}
+		
+		<li class="{% if curr_board.title == board.title %}active{% endif %}"><a href="/{{board.title}}">{{board.title}}</a></li>
+	
+	{%endfor%}
+{%endblock nav%}
+
+{%block mobile-nav%}
+	<li><a href="/">Home</a></li>
+	{% for board in boards %}
+		
+		<li class="{% if curr_board.title == board.title %}active{% endif %}"><a href="/{{board.title}}">{{board.title}}</a></li>
+	
+	{%endfor%}
+{%endblock mobile-nav%}
+
+
+{%block content%}
+<div class="row" style="padding:20px">
+{%for rep in reps%}
+{%cycle "grey lighten-5"  as cardcolor silent%}
+<div class="col s12 m10 offset-m1">
+	<div class="card {{cardcolor}} ">
+	<div class="card-content row valign-wrapper">
+	  <div class="col s12 m2">
+	    <img src="{{rep.image.url}}" alt="{{rep.first_name}}" class="z-depth-2  responsive-img"> <!-- notice the "circle" class -->
+	  </div>
+	  <div class="col s12 m10 ">
+	  	<div class="row" style="padding:10px auto">
+		  		<h5 class="col s12 m12 grey-text text-darken-1">{{rep.first_name|upper}} {{rep.last_name|upper}}</h5>
+		  	<div class="col s12 m3 grey-text text-darken-1 ">
+			  	{{rep.position}},<br>
+			  	{{rep.description}}<br>
+			  	{{rep.degree}} , {{rep.year}} Year<br> {{rep.dept}}<br>
+		  	</div>
+		  	<div class="col s12 m3">
+		  		<span class="flow-text blue-text text-lighten-2">{{rep.join_data|days_since}} <small>DAYS IN OFFICE</small></span>
+		  		<div class="progress">
+		  	     	<div class="determinate blue lighten-1" style="width: {% widthratio rep.join_data|days_since 365 100 %}%">
+		  	     	</div>		  			  		
+		  	 	</div>
+		  	</div>
+		  	<div class="col s12 m3">
+		  		<span class="flow-text blue-text text-lighten-2">{{rep.successful}} <small>POINTS COVERED</small></span>
+		  		<div class="progress">
+		  	     	<div class="determinate blue lighten-1" style="width: {% widthratio rep.successful 	rep.promise_set.count  100 %}%">
+		  	     	</div>		  			  		
+		  	 	</div>
+
+		  	</div>
+		  
+		  	
+		</div>
+	    <span class="grey-text text-darken-4"><i href="#modal{{rep.id}}" class=" modal-trigger waves-effect waves-light material-icons right">more_vert</i></span>
+     
+	  </div>
+	  </div>
+	</div>
+</div>
+<div id="modal{{rep.id}}" class="modal">
+      <a href="#!" style="margin:10px 5px"class=" modal-action modal-close waves-effect  material-icons right">close</a>
+    <div class="modal-content grey-text text-darken-2">
+      <h4 style="margin-left:15px">{{rep.first_name}} {{rep.last_name}}</h4>
+      <div class="row">
+      {%for state in status%}
+      <div class="col s12 m3" style="margin-top:10px "> 
+      <div class="{{state.0}} circle z-depth-1" style="width:80%;margin-left:10%;height:30px;padding:5px;text-align:center">
+      {{state.1}}
+      </div>
+      </div>
+      {%endfor%}
+
+      </div>
+      {# <div class="row"> #}
+      <ul class="collapsible popout" data-collapsible="accordion">
+      {%for promisegroup in rep.pg%}
+      <li>
+      <div class="collapsible-header"><i class="material-icons teal-text">play_arrow</i>{{promisegroup.description}}</div>
+      <div class="collapsible-body">
+      	<ul class="white">
+      	{%for promise in promisegroup.promisesC%}
+      	{%with promise.status as tcol%}
+
+      	<li class="{{textcol|get_item:tcol}}-text " style="padding:5px 10px 5px 10px;margin:10px auto"><div style="display:inline-block" class="material-icons left">{{icons|get_item:tcol}}</div><div style="display:inline-block">{{promise.description}}</div></li>
+      	{%endwith%}
+      	{%endfor%}
+      	{%for promise in promisegroup.promisesWIP%}
+      	{%with promise.status as tcol%}
+
+      	<li class="{{textcol|get_item:tcol}}-text " style="padding:5px 10px 5px 10px;margin:10px auto"><div style="display:inline-block" class="material-icons left">{{icons|get_item:tcol}}</div><div style="display:inline-block">{{promise.description}}</div></li>
+      	{%endwith%}
+      	{%endfor%}
+      	{%for promise in promisegroup.promisesNS%}
+      	{%with promise.status as tcol%}
+
+      	<li class="{{textcol|get_item:tcol}}-text " style="padding:5px 10px 5px 10px;margin:10px auto"><div style="display:inline-block" class="material-icons left">{{icons|get_item:tcol}}</div><div style="display:inline-block">{{promise.description}}</div></li>
+      	{%endwith%}
+      	{%endfor%}
+      	{%for promise in promisegroup.promisesB%}
+      	{%with promise.status as tcol%}
+
+      	<li class="{{textcol|get_item:tcol}}-text " style="padding:5px 10px 5px 10px;margin:10px auto"><div style="display:inline-block" class="material-icons left">{{icons|get_item:tcol}}</div><div style="display:inline-block">{{promise.description}}</div></li>
+      	{%endwith%}
+      	{%endfor%}
+      	</ul>
+
+      </div>
+      </li>
+      {%endfor%}
+      </ul>
+
+    {# </div> #}
+    </div>
+    {# <div class="modal-footer"> #}
+    {# </div> #}
+  </div>
+{%endfor%}
+{%endblock content%}
